@@ -8,7 +8,7 @@ for extracurricular activities at Mergington High School.
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr
 import os
 from pathlib import Path
 
@@ -98,7 +98,7 @@ def get_activities():
 def signup_for_activity(activity_name: str, request: SignupRequest):
     """Sign up a student for an activity"""
     email = str(request.email)
-    
+
     # Validate activity exists
     if activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
@@ -119,7 +119,7 @@ def signup_for_activity(activity_name: str, request: SignupRequest):
 def unregister_participant(activity_name: str, email: EmailStr = Query(..., description="Email address of participant to unregister")):
     """Unregister a participant from an activity"""
     email_str = str(email)
-    
+
     # Validate activity exists
     if activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
