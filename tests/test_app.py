@@ -70,9 +70,6 @@ def reset_activities():
     activities.clear()
     activities.update(copy.deepcopy(INITIAL_ACTIVITIES_STATE))
     yield
-    # Clean up after test
-    activities.clear()
-    activities.update(copy.deepcopy(INITIAL_ACTIVITIES_STATE))
 
 
 def test_get_activities():
