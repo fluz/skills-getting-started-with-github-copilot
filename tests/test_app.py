@@ -55,6 +55,21 @@ def test_signup_with_invalid_email():
     response = client.post("/activities/Basketball Team/signup", params={"email": long_email})
     assert response.status_code == 400
     assert response.json()["detail"] == "Invalid email format"
+    
+    # Test with consecutive dots (invalid per RFC 5322)
+    response = client.post("/activities/Basketball Team/signup", params={"email": "user..name@example.com"})
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Invalid email format"
+    
+    # Test with leading dot
+    response = client.post("/activities/Basketball Team/signup", params={"email": ".user@example.com"})
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Invalid email format"
+    
+    # Test with trailing dot in local part
+    response = client.post("/activities/Basketball Team/signup", params={"email": "user.@example.com"})
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Invalid email format"
 
 
 def test_unregister_with_invalid_email():

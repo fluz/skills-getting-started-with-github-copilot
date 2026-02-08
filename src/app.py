@@ -85,7 +85,16 @@ def validate_email(email: str) -> bool:
     if len(email) > 254:  # RFC 5321 maximum email length
         return False
     
-    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    # Improved regex that prevents consecutive dots and validates proper structure
+    # Pattern breakdown:
+    # - Local part: starts and ends with alphanumeric/allowed chars, no consecutive dots
+    # - Domain: proper domain structure with at least 2 chars in TLD
+    email_pattern = r'^[a-zA-Z0-9][a-zA-Z0-9._%+-]*[a-zA-Z0-9]@[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$|^[a-zA-Z0-9]@[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$'
+    
+    # Additional check to prevent consecutive dots
+    if '..' in email:
+        return False
+        
     return re.match(email_pattern, email) is not None
 
 
