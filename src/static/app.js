@@ -28,19 +28,30 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="participants">
             <strong>Participants:</strong>
             <ul>
-              ${details.participants.map(participant => `<li>${participant}</li>`).join("") || "<li>No participants yet</li>"}
+              ${details.participants
+                .map(
+                  (participant) => `
+                    <li>
+                      ${participant}
+                      <button class="delete-participant" data-email="${participant}" data-activity="${name}">Delete</button>
+                    </li>
+                  `
+                )
+                .join("") || "<li>No participants yet</li>"}
             </ul>
           </div>
         `;
 
         activitiesList.appendChild(activityCard);
-
         // Add option to select dropdown
         const option = document.createElement("option");
         option.value = name;
         option.textContent = name;
         activitySelect.appendChild(option);
       });
+
+      // Reapply delete functionality after rendering
+      addDeleteFunctionality();
     } catch (error) {
       activitiesList.innerHTML = "<p>Failed to load activities. Please try again later.</p>";
       console.error("Error fetching activities:", error);
@@ -68,6 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        fetchActivities(); // Refresh the activities list automatically
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
@@ -87,6 +99,37 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Add delete functionality
+  function addDeleteFunctionality() {
+    const deleteButtons = document.querySelectorAll(".delete-participant");
+
+    deleteButtons.forEach((button) => {
+      button.addEventListener("click", async (event) => {
+        const participantEmail = event.target.dataset.email;
+        const activityName = event.target.dataset.activity;
+
+        try {
+          const response = await fetch(
+            `/activities/${encodeURIComponent(activityName)}/unregister?email=${encodeURIComponent(participantEmail)}`,
+            {
+              method: "DELETE",
+            }
+          );
+
+          if (response.ok) {
+            fetchActivities(); // Refresh the activities list
+          } else {
+            console.error("Failed to unregister participant");
+          }
+        } catch (error) {
+          console.error("Error unregistering participant:", error);
+        }
+      });
+    });
+  }
+
   // Initialize app
-  fetchActivities();
+  fetchActivities().then(() => {
+    addDeleteFunctionality();
+  });
 });
