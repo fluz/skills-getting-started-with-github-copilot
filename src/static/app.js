@@ -129,7 +129,5 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Initialize app
-  fetchActivities().then(() => {
-    addDeleteFunctionality();
-  });
+  fetchActivities();
 });
