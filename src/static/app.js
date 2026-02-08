@@ -12,6 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Clear loading message
       activitiesList.innerHTML = "";
+      
+      // Clear existing options from dropdown to prevent duplicates
+      activitySelect.innerHTML = "";
 
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
