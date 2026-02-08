@@ -81,6 +81,10 @@ activities = {
 
 def validate_email(email: str) -> bool:
     """Validate email format using a simple regex pattern"""
+    # Check length to prevent extremely long inputs
+    if len(email) > 254:  # RFC 5321 maximum email length
+        return False
+    
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(email_pattern, email) is not None
 

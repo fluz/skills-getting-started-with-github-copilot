@@ -49,6 +49,12 @@ def test_signup_with_invalid_email():
     response = client.post("/activities/Basketball Team/signup", params={"email": "<img src=x onerror=alert(1)>@test.com"})
     assert response.status_code == 400
     assert response.json()["detail"] == "Invalid email format"
+    
+    # Test with extremely long email
+    long_email = "a" * 300 + "@test.com"
+    response = client.post("/activities/Basketball Team/signup", params={"email": long_email})
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Invalid email format"
 
 
 def test_unregister_with_invalid_email():

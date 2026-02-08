@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
           details.participants.forEach((participant) => {
             const li = document.createElement("li");
             // Use textContent to safely display participant email
-            li.textContent = participant;
+            li.appendChild(document.createTextNode(participant));
             li.appendChild(document.createTextNode(" "));
             
             const deleteButton = document.createElement("button");
