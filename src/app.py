@@ -8,6 +8,7 @@ for extracurricular activities at Mergington High School.
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
+from pydantic import BaseModel, EmailStr
 import os
 from pathlib import Path
 
@@ -78,6 +79,11 @@ activities = {
 }
 
 
+class SignupRequest(BaseModel):
+    """Request model for activity signup with validated email"""
+    email: EmailStr
+
+
 @app.get("/")
 def root():
     return RedirectResponse(url="/static/index.html")
@@ -89,8 +95,10 @@ def get_activities():
 
 
 @app.post("/activities/{activity_name}/signup")
-def signup_for_activity(activity_name: str, email: str):
+def signup_for_activity(activity_name: str, request: SignupRequest):
     """Sign up a student for an activity"""
+    email = str(request.email)
+
     # Validate activity exists
     if activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
@@ -108,8 +116,10 @@ def signup_for_activity(activity_name: str, email: str):
 
 
 @app.delete("/activities/{activity_name}/unregister")
-def unregister_participant(activity_name: str, email: str = Query(...)):
+def unregister_participant(activity_name: str, email: EmailStr = Query(..., description="Email address of participant to unregister")):
     """Unregister a participant from an activity"""
+    email_str = str(email)
+
     # Validate activity exists
     if activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
@@ -118,9 +128,9 @@ def unregister_participant(activity_name: str, email: str = Query(...)):
     activity = activities[activity_name]
 
     # Validate student is signed up
-    if email not in activity["participants"]:
+    if email_str not in activity["participants"]:
         raise HTTPException(status_code=404, detail="Participant not found in activity")
 
     # Remove student
-    activity["participants"].remove(email)
-    return {"message": f"Unregistered {email} from {activity_name}"}
+    activity["participants"].remove(email_str)
+    return {"message": f"Unregistered {email_str} from {activity_name}"}
