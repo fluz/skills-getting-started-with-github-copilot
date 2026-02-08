@@ -9,6 +9,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 import os
+import re
 from pathlib import Path
 
 app = FastAPI(title="Mergington High School API",
@@ -78,6 +79,25 @@ activities = {
 }
 
 
+def validate_email(email: str) -> bool:
+    """Validate email format using a simple regex pattern"""
+    # Check length to prevent extremely long inputs
+    if len(email) > 254:  # RFC 5321 maximum email length
+        return False
+    
+    # Improved regex that prevents consecutive dots and validates proper structure
+    # Pattern breakdown:
+    # - Local part: starts and ends with alphanumeric/allowed chars, no consecutive dots
+    # - Domain: proper domain structure with at least 2 chars in TLD
+    email_pattern = r'^[a-zA-Z0-9][a-zA-Z0-9._%+-]*[a-zA-Z0-9]@[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$|^[a-zA-Z0-9]@[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$'
+    
+    # Additional check to prevent consecutive dots
+    if '..' in email:
+        return False
+        
+    return re.match(email_pattern, email) is not None
+
+
 @app.get("/")
 def root():
     return RedirectResponse(url="/static/index.html")
@@ -91,6 +111,10 @@ def get_activities():
 @app.post("/activities/{activity_name}/signup")
 def signup_for_activity(activity_name: str, email: str):
     """Sign up a student for an activity"""
+    # Validate email format
+    if not validate_email(email):
+        raise HTTPException(status_code=400, detail="Invalid email format")
+    
     # Validate activity exists
     if activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
@@ -110,6 +134,10 @@ def signup_for_activity(activity_name: str, email: str):
 @app.delete("/activities/{activity_name}/unregister")
 def unregister_participant(activity_name: str, email: str = Query(...)):
     """Unregister a participant from an activity"""
+    # Validate email format
+    if not validate_email(email):
+        raise HTTPException(status_code=400, detail="Invalid email format")
+    
     # Validate activity exists
     if activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
